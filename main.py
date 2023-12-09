@@ -1,77 +1,85 @@
-from kivy.app import App
-from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.button import Button
-from kivy.uix.textinput import TextInput
-
-try:
-
-   class MainApp(App):
-       def build(self):
-         self.icon = "calculator.png"
-         self.operators = ["/", "*", "+", "-"]
-         self.last_was_operator = None
-         self.last_button = None
-
-         main_layout = BoxLayout(orientation="vertical")
-         self.solution = TextInput(background_color="black", foreground_color="white",
-                                  multiline=False, halign="right", font_size=55, readonly=True)
-
-         main_layout.add_widget(self.solution)
-         buttons = [
-            ["7", "8", "9", "/"],
-            ["4", "5", "6", "*"],
-            ["1", "2", "3", "+"],
-            [".", "0", "C", "-"]
-         ]
-         for row in buttons:
-             h_layout = BoxLayout()
-             for label in row:
-                button = Button(
-                    text=label, font_size=30, background_color="grey",
-                    pos_hint={"center_x": 0.5, "center_y": 0.5},
-                    )
-                button.bind(on_press=self.on_button_press)
-                h_layout.add_widget(button)
-                main_layout.add_widget(h_layout)
-
-                equal_button = Button(
-                text="=", font_size=30, background_color="grey",
-                pos_hint={"center_x": 0.5, "center_y": 0.5},
-                )
-                equal_button.bind(on_press=self.on_solution)
-                main_layout.add_widget(equal_button)
-
-                return main_layout
-
-             def on_button_press(self, instance):
-                current = self.solution.text
-                button_text = instance.text
-
-                if button_text == "C":
-                    self.solution.text = ""
-                else:
-                    if current and (
-                        self.last_was_operator and button_text in self.operators):
-                        return
-                    elif current == "" and button_text in self.operators:
-                        return
-                    else:
-                        new_text = current + button_text
-                        self.solution.text = new_text
-                        self.last_button = button_text
-                        self.last_was_operator = self.last_button in self.operators
-
-                        def on_solution(self, instance):
-                          text = self.solution.text
-                          if text:
-                            solution = str(eval(self.solution.text))
-                            self.solution.text = solution
-
-except ZeroDivisionError:
-    print("Invalid equation!")
+from tkinter import *
+from tkinter import messagebox
+import base64
+import os
 
 
-if __name__ == "__main__":
-    app = MainApp()
-    app.run()
+def decrypt():
+    password = code.get()
+    if password == "1234":
+        screen2 = Toplevel(screen)
+        screen2.title("Decryption")
+        screen2.geometry("400x200")
+        screen2.configure(bg="#00bd56")
 
+        message = text1.get(1.0, END)
+        decode_message = message.encode("ascii")
+        base64_bytes = base64.b64decode(decode_message)
+        decrypt = base64_bytes.decode("ascii")
+
+        Label(screen2, text="DECRYPT", font="arial", fg="black", bg="#00bd56").place(x=10, y=10)
+        text2 = Text(screen2, font="Rpbote 13", bg="black", relief=GROOVE, wrap=WORD, bd=0)
+        text2.place(x=10, y=40, width=380, height=150)
+
+        text2.insert(END, decrypt)
+    elif password == "":
+        messagebox.showerror("Decryption", "Input Password")
+    elif password != "1234":
+        messagebox.showerror("Decryption", "Invalid Password")
+
+
+def encrypt():
+    password = code.get()
+    if password == "1234":
+        screen1 = Toplevel(screen)
+        screen1.title("Encryption")
+        screen1.geometry("400x200")
+        screen1.configure(bg="#ed3883")
+
+        message = text1.get(1.0, END)
+        encode_message = message.encode("ascii")
+        base64_bytes = base64.b64encode(encode_message)
+        encrypt = base64_bytes.decode("ascii")
+
+        Label(screen1, text="ENCRYPT", font="arial", fg="black", bg="#ed3883").place(x=10, y=10)
+        text2 = Text(screen1, font="Rpbote 13", bg="black", relief=GROOVE, wrap=WORD, bd=0)
+        text2.place(x=10, y=40, width=380, height=150)
+
+        text2.insert(END, encrypt)
+    elif password == "":
+        messagebox.showerror("Encryption", "Input Password")
+    elif password != "1234":
+        messagebox.showerror("Encryption", "Invalid Password")
+
+
+def main_screen():
+    global screen
+    global code
+    global text1
+
+    screen = Tk()
+    screen.geometry("375x398")
+
+    #image_icon = PhotoImage(file="keys.png")
+    #screen.iconphoto(False, image_icon)
+    screen.title("PctApp")
+
+    def reset():
+        code.set("")
+        text1.delete(1.0,END)
+
+    Label(text="Enter text for encryption and decryption", fg="white", font=("calbri", 14)).place(x=10, y=10)
+    text1 = Text(font="Rpbote 20", bg="grey", relief=GROOVE, wrap=WORD, bd=0)
+    text1.place(x=10, y=50, width=355, height=100)
+
+    Label(text="Enter secret key for encryption and decryption", fg="white", font=("calbri", 14)).place(x=10, y=170)
+    code = StringVar()
+    Entry(textvariable=code, width=19, bd=0, font=("ariel", 25), show="*").place(x=10, y=200)
+
+    Button(text="ENCRYPT", height="2", width=23, bg="#ed3883", fg="black", bd=0, command=encrypt).place(x=10, y=250)
+    Button(text="DECRYPT", height="2", width=23, bg="#00bd56", fg="black", bd=0, command=decrypt).place(x=200, y=250)
+    Button(text="RESET", height="2", width=50, bg="#1089ff", fg="black", bd=0, command=reset).place(x=10, y=300)
+    screen.mainloop()
+
+
+main_screen()
